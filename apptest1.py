@@ -127,7 +127,7 @@ class FaceRecognitionSystem:
         best_match = "Unknown"
         best_score = float('inf')
         is_new_person = True
-        confidence_threshold = 0.38
+        confidence_threshold = 0.95
         for filename, stored_features in self.known_faces.items():
             similarity = cosine(face_features, stored_features)
             if similarity < best_score:
@@ -138,17 +138,17 @@ class FaceRecognitionSystem:
         self.detection_log.append({
             'predicted': best_match,
             'confidence': best_score,
-            'timestamp': datetime.datetime.now() # Use datetime.datetime.now()
+            'timestamp': datetime.datetime.now()
         })
         if not is_new_person:
             self.update_attendance(best_match)
         return best_match, best_score, is_new_person
-
+        #added 5-minute check to prevent multiple attendance being logged
     def update_attendance(self, person_name):
         current_time = datetime.datetime.now()
         if person_name in self.last_detection:
             time_diff = (current_time - self.last_detection[person_name]).total_seconds()
-            if time_diff < 300:
+            if time_diff < 300:  # 5-minute time difference to prevent multiple checks
                 return
         self.last_detection[person_name] = current_time
         current_date = current_time.strftime("%Y-%m-%d")
@@ -234,4 +234,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
